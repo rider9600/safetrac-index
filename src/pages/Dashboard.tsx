@@ -46,8 +46,16 @@ const Dashboard = () => {
       <Navigation />
       
       <div className="container mx-auto px-6 pb-8">
+        {/* Top Section - Key Metrics */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+          <SafetyGauge score={82} />
+          <EventsChart data={mockEventData} showPieChart />
+          <SafetyTrendChart data={mockTrendData} />
+        </div>
+
+        {/* Main Dashboard Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Date Selector & Safety Score */}
+          {/* Left Column - Date Selector */}
           <div className="space-y-6">
             <DateSelector
               availableDates={mockDates}
@@ -55,7 +63,6 @@ const Dashboard = () => {
               onDateSelect={setSelectedDate}
               onSyncData={() => console.log("Syncing...")}
             />
-            <SafetyGauge score={82} />
           </div>
 
           {/* Middle Column - Metrics */}
@@ -100,13 +107,11 @@ const Dashboard = () => {
                 description="Trips during night hours"
               />
             </div>
-            <EventsChart data={mockEventData} showPieChart />
           </div>
 
-          {/* Right Column - Charts */}
+          {/* Right Column - Speed Chart */}
           <div className="space-y-6">
             <SpeedChart data={mockSpeedData} />
-            <SafetyTrendChart data={mockTrendData} />
           </div>
         </div>
 
