@@ -17,6 +17,7 @@ interface DateSelectorProps {
   onDateSelect: (date: string) => void;
   onSyncData?: () => void;
   isLoading?: boolean;
+  compact?: boolean;
 }
 
 const DateSelector = ({ 
@@ -24,7 +25,8 @@ const DateSelector = ({
   selectedDate, 
   onDateSelect, 
   onSyncData,
-  isLoading = false 
+  isLoading = false,
+  compact = false
 }: DateSelectorProps) => {
   const [sortBy, setSortBy] = useState<'date' | 'files'>('date');
 
@@ -53,7 +55,38 @@ const DateSelector = ({
     return "bg-safety-warning text-white";
   };
 
-  return (
+  return compact ? (
+    // Compact version for navigation
+    <div className="flex items-center space-x-2">
+      <Calendar className="w-4 h-4 text-muted-foreground" />
+      <select
+        value={selectedDate || ""}
+        onChange={(e) => onDateSelect(e.target.value)}
+        className="bg-transparent border border-nav-border rounded px-2 py-1 text-sm text-foreground focus:outline-none focus:border-primary"
+      >
+        <option value="">Select Date</option>
+        {sortedDates.map((folder) => {
+          const formatted = formatDate(folder.date);
+          return (
+            <option key={folder.date} value={folder.date} disabled={!folder.hasData}>
+              {formatted.month} {formatted.day}, {formatted.year} ({folder.fileCount} files)
+            </option>
+          );
+        })}
+      </select>
+      {onSyncData && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onSyncData}
+          disabled={isLoading}
+          className="p-1"
+        >
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+        </Button>
+      )}
+    </div>
+  ) : (
     <Card className="bg-card shadow-card border-0">
       <CardHeader>
         <div className="flex items-center justify-between">

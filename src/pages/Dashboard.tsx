@@ -1,23 +1,13 @@
-import { useState } from "react";
 import Navigation from "@/components/layout/Navigation";
 import SafetyGauge from "@/components/dashboard/SafetyGauge";
 import MetricCard from "@/components/dashboard/MetricCard";
-import DateSelector from "@/components/dashboard/DateSelector";
 import SpeedChart from "@/components/charts/SpeedChart";
 import EventsChart from "@/components/charts/EventsChart";
 import SafetyTrendChart from "@/components/charts/SafetyTrendChart";
 import { Gauge, AlertTriangle, Zap, Navigation as NavIcon, Moon } from "lucide-react";
 
 const Dashboard = () => {
-  const [selectedDate, setSelectedDate] = useState<string | null>("2024-01-15");
-
   // Mock data - replace with Supabase data
-  const mockDates = [
-    { date: "2024-01-15", hasData: true, fileCount: 12, size: "2.4MB" },
-    { date: "2024-01-14", hasData: true, fileCount: 8, size: "1.8MB" },
-    { date: "2024-01-13", hasData: true, fileCount: 15, size: "3.1MB" },
-  ];
-
   const mockSpeedData = Array.from({ length: 20 }, (_, i) => ({
     time: `${8 + Math.floor(i / 4)}:${(i % 4) * 15}`,
     speed: 30 + Math.random() * 40,
@@ -54,18 +44,8 @@ const Dashboard = () => {
         </div>
 
         {/* Main Dashboard Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Date Selector */}
-          <div className="space-y-6">
-            <DateSelector
-              availableDates={mockDates}
-              selectedDate={selectedDate}
-              onDateSelect={setSelectedDate}
-              onSyncData={() => console.log("Syncing...")}
-            />
-          </div>
-
-          {/* Middle Column - Metrics */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Metrics */}
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <MetricCard

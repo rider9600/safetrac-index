@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import DateSelector from "@/components/dashboard/DateSelector";
 import { 
   BarChart3, 
   Shield, 
@@ -12,13 +13,22 @@ import {
   Moon, 
   Sun,
   Menu,
-  X
+  X,
+  Database
 } from "lucide-react";
 
 const Navigation = () => {
   const location = useLocation();
   const [isDark, setIsDark] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | null>("2024-01-15");
+
+  // Mock data - same as used in Dashboard
+  const mockDates = [
+    { date: "2024-01-15", hasData: true, fileCount: 12, size: "2.4MB" },
+    { date: "2024-01-14", hasData: true, fileCount: 8, size: "1.8MB" },
+    { date: "2024-01-13", hasData: true, fileCount: 15, size: "3.1MB" },
+  ];
 
   const toggleTheme = () => {
     setIsDark(!isDark);
@@ -69,6 +79,17 @@ const Navigation = () => {
                 </Link>
               );
             })}
+            
+            {/* Data Browser */}
+            <div className="ml-4 pl-4 border-l border-nav-border">
+              <DateSelector
+                availableDates={mockDates}
+                selectedDate={selectedDate}
+                onDateSelect={setSelectedDate}
+                onSyncData={() => console.log("Syncing...")}
+                compact={true}
+              />
+            </div>
           </div>
 
           {/* Theme Toggle & Mobile Menu */}
