@@ -1,12 +1,18 @@
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Navigation from "@/components/layout/Navigation";
 import SafetyGauge from "@/components/dashboard/SafetyGauge";
 import MetricCard from "@/components/dashboard/MetricCard";
 import SpeedChart from "@/components/charts/SpeedChart";
 import EventsChart from "@/components/charts/EventsChart";
 import SafetyTrendChart from "@/components/charts/SafetyTrendChart";
-import { Gauge, AlertTriangle, Zap, Navigation as NavIcon, Moon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Gauge, AlertTriangle, Zap, Navigation as NavIcon, Moon, Radio } from "lucide-react";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const riderName = searchParams.get("rider") || "Unknown Rider";
+  
   // Mock data - replace with Supabase data
   const mockSpeedData = Array.from({ length: 20 }, (_, i) => ({
     time: `${8 + Math.floor(i / 4)}:${(i % 4) * 15}`,
@@ -35,7 +41,23 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <div className="container mx-auto px-6 pb-8">
+      <div className="container mx-auto px-6 pb-8 pt-8">
+        {/* Header with Start Command */}
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Fleet Safety Dashboard</h1>
+            <p className="text-muted-foreground">Real-time monitoring for {riderName}</p>
+          </div>
+          <Button 
+            onClick={() => navigate(`/realtime-command?rider=${riderName}`)}
+            size="lg"
+            className="gap-2"
+          >
+            <Radio className="w-5 h-5" />
+            Start Command
+          </Button>
+        </div>
+        
         {/* Top Section - Key Metrics */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <SafetyGauge score={82} />
