@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/layout/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -7,79 +7,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Download, FileText, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { supabase } from '@/lib/supabase';
 
 const Reports = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [csvLogs, setCsvLogs] = useState([]);
 
-  // Mock CSV file logs data
-  const csvLogs = [
-    {
-      id: 1,
-      fileName: "sensor_readings_2024_01_15.csv",
-      uploadTime: "2024-01-15 09:30:22",
-      fileSize: "2.4MB",
-      recordCount: 12847,
-      status: "processed",
-      sensorType: "Temperature",
-      location: "Building A - Floor 3",
-      processingTime: "45s",
-      errors: 0,
-      warnings: 2
-    },
-    {
-      id: 2,
-      fileName: "pressure_sensors_2024_01_15.csv",
-      uploadTime: "2024-01-15 08:15:10",
-      fileSize: "1.8MB",
-      recordCount: 9634,
-      status: "processing",
-      sensorType: "Pressure",
-      location: "Building B - Floor 1",
-      processingTime: "30s",
-      errors: 0,
-      warnings: 0
-    },
-    {
-      id: 3,
-      fileName: "humidity_data_2024_01_14.csv",
-      uploadTime: "2024-01-14 16:45:33",
-      fileSize: "3.1MB",
-      recordCount: 15203,
-      status: "error",
-      sensorType: "Humidity",
-      location: "Building C - Floor 2",
-      processingTime: "1m 20s",
-      errors: 3,
-      warnings: 1
-    },
-    {
-      id: 4,
-      fileName: "vibration_sensors_2024_01_14.csv",
-      uploadTime: "2024-01-14 14:20:15",
-      fileSize: "4.2MB",
-      recordCount: 18956,
-      status: "processed",
-      sensorType: "Vibration",
-      location: "Building A - Floor 1",
-      processingTime: "2m 10s",
-      errors: 0,
-      warnings: 5
-    },
-    {
-      id: 5,
-      fileName: "air_quality_2024_01_13.csv",
-      uploadTime: "2024-01-13 11:10:05",
-      fileSize: "1.5MB",
-      recordCount: 7832,
-      status: "processed",
-      sensorType: "Air Quality",
-      location: "Building B - Floor 3",
-      processingTime: "25s",
-      errors: 0,
-      warnings: 0
-    }
-  ];
+  useEffect(() => {
+    const fetchReports = async () => {
+      const { data: files, error } = await supabase
+        .from('sensor_files')
+        .select(`
+          id,
+          filename,
+          upload_time,
+          file_size,
+          record_count,
+          status,
+          processing_time,
+          errors,
+          warnings,
+          riders(name)
+        `)
+        .order('upload_time', { ascending: false });
+
+      if (!error) setCsvLogs(files || []);
+    };
+    fetchReports();
+  }, []);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -95,9 +51,9 @@ const Reports = () => {
   };
 
   const filteredLogs = csvLogs.filter((log) => {
-    const matchesSearch = log.fileName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.sensorType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         log.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = log.filename?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          log.sensorType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          log.location?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || log.status === statusFilter;
     return matchesSearch && matchesStatus;
   });

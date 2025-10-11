@@ -8,9 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Reports from "./pages/Reports";
 import RealtimeCommand from "./pages/RealtimeCommand";
 import NotFound from "./pages/NotFound";
-
 const queryClient = new QueryClient();
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -29,5 +27,4 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
 export default App;

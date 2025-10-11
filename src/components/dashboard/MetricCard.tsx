@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LucideIcon } from "lucide-react";
+import React from "react"; // Make sure React is imported
 
 interface MetricCardProps {
   title: string;
@@ -9,7 +10,7 @@ interface MetricCardProps {
   icon: LucideIcon;
   trend?: number;
   color: "speed" | "events" | "braking" | "swerving" | "night";
-  description?: string;
+  description?: React.ReactNode; // <-- Updated: now accepts JSX
 }
 
 const MetricCard = ({ 
@@ -84,9 +85,9 @@ const MetricCard = ({
         )}
 
         {description && (
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            {description}
-          </p>
+          <div className="text-xs text-muted-foreground leading-relaxed">
+            {description} {/* Can now render multiple lines / JSX */}
+          </div>
         )}
 
         {/* Hover Effect */}

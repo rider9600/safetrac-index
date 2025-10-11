@@ -1,9 +1,30 @@
-import { useState } from "react";
+import { supabase } from "@/lib/supabaseclient";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserPlus, Users } from "lucide-react";
@@ -15,14 +36,33 @@ const RiderSelection = () => {
   const [selectedRider, setSelectedRider] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newRiderName, setNewRiderName] = useState("");
-  const [riders, setRiders] = useState([
-    { id: "1", name: "Rider 001" },
-    { id: "2", name: "Rider 002" },
-    { id: "3", name: "Rider 003" },
-    { id: "4", name: "Rider 004" },
-  ]);
+  const [riders, setRiders] = useState<Array<{ id: string; name: string }>>([]);
 
-  const handleAddRider = () => {
+  useEffect(() => {
+  const fetchRiders = async () => {
+    const { data, error } = await supabase
+      .from("riders")
+      .select("*")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching riders:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load riders",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Fetched riders:", data);
+    setRiders(data || []);
+  };
+
+  fetchRiders();
+}, []);
+
+  const handleAddRider = async () => {
     if (!newRiderName.trim()) {
       toast({
         title: "Error",
@@ -32,21 +72,28 @@ const RiderSelection = () => {
       return;
     }
 
-    const newRider = {
-      id: String(riders.length + 1),
-      name: newRiderName.trim(),
-    };
+    // Correct table name!
+    const { data, error } = await supabase
+      .from("riders")
+      .insert({ name: newRiderName.trim() })
+      .select();
 
-    setRiders([...riders, newRider]);
+    if (error) {
+      toast({ title: "Error", description: "Failed to add rider", variant: "destructive" });
+      console.error(error);
+      return;
+    }
+
+    setRiders(prev => [...prev, ...(data || [])]);
     setNewRiderName("");
     setIsDialogOpen(false);
-    
-    toast({
-      title: "Success",
-      description: `${newRider.name} has been added`,
-    });
+
+    if (data?.[0]?.name) {
+      toast({ title: "Success", description: `${data[0].name} has been added` });
+    }
   };
 
+  // Route with riderId for consistency with database!
   const handleSelectRider = () => {
     if (!selectedRider) {
       toast({
@@ -56,12 +103,10 @@ const RiderSelection = () => {
       });
       return;
     }
-
-    const rider = riders.find(r => r.id === selectedRider);
-    navigate(`/dashboard?rider=${rider?.name}`);
+    navigate(`/dashboard?riderId=${selectedRider}`);
   };
 
-  return (
+   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
@@ -69,7 +114,9 @@ const RiderSelection = () => {
             <Users className="w-16 h-16 text-primary" />
           </div>
           <CardTitle className="text-3xl font-bold">SafeTrac</CardTitle>
-          <CardDescription className="text-base">Select a rider to view their dashboard</CardDescription>
+          <CardDescription className="text-base">
+            Select a rider to view their dashboard
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
@@ -88,11 +135,7 @@ const RiderSelection = () => {
             </Select>
           </div>
 
-          <Button 
-            onClick={handleSelectRider} 
-            className="w-full"
-            size="lg"
-          >
+          <Button onClick={handleSelectRider} className="w-full" size="lg">
             Continue to Dashboard
           </Button>
 
@@ -127,7 +170,10 @@ const RiderSelection = () => {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDialogOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button onClick={handleAddRider}>Add Rider</Button>
